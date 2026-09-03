@@ -1,0 +1,204 @@
+/* ------------------------------------------------------------------ *
+ * Base: reset, typography, focus, motion and global utilities
+ * ------------------------------------------------------------------ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--color-page);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  color: var(--color-ink);
+  background: var(--color-page);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure {
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  line-height: var(--leading-tight);
+}
+
+h2 {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.01em;
+  line-height: var(--leading-tight);
+}
+
+h3 {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+a {
+  color: var(--color-teal-700);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+:root[data-theme='dark'] a {
+  color: var(--color-teal-400);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) a {
+    color: var(--color-teal-400);
+  }
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* WCAG 2.4.7 / 2.4.11 — a focus indicator that is always visible and ≥3:1. */
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* WCAG 2.4.1 — bypass the repeated navigation block. */
+.skip-link {
+  position: absolute;
+  left: var(--space-4);
+  top: -100px;
+  z-index: 100;
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  border: 2px solid var(--color-focus);
+  border-radius: var(--radius-md);
+  font-weight: var(--weight-semibold);
+  box-shadow: var(--shadow-md);
+  transition: top var(--duration-fast) var(--ease-standard);
+}
+
+.skip-link:focus {
+  top: var(--space-4);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.eyebrow {
+  display: block;
+  color: var(--color-teal-700);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+:root[data-theme='dark'] .eyebrow {
+  color: var(--color-teal-400);
+}
+
+.muted {
+  color: var(--color-ink-muted);
+}
+
+.icon {
+  flex: 0 0 auto;
+}
+
+/* Honour the OS setting for reduced motion (WCAG 2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .button,
+  .surface-card,
+  .badge {
+    border: 1px solid CanvasText;
+  }
+}
+
+/* Print: keep a clean record of tables and lists. */
+@media print {
+  .sidebar,
+  .mobile-nav,
+  .page-header .header-actions,
+  .toast-region {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  .main-area {
+    margin-left: 0;
+  }
+}

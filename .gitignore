@@ -1,9 +1,29 @@
+# Dependencies
 node_modules/
+
+# Build output
 build/
-.env
 client/dist/
+*.tsbuildinfo
+
+# Environment: only the documented template is committed
+.env
+.env.*
+!.env.example
+
+# Local data (the SQLite demo database has been retired; kept for old checkouts)
 data/*.db
 data/*.db-shm
 data/*.db-wal
+
+# Test and coverage artifacts
+coverage/
+
+# Tooling caches
+.eslintcache
+.cache/
+.vercel/
+
+# OS noise
 .DS_Store
 npm-debug.log*

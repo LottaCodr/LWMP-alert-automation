@@ -1,0 +1,9 @@
+node_modules
+build
+client/dist
+coverage
+package-lock.json
+migrations
+supabase
+docs/RENDER_DEPLOYMENT.md
+docs/SUPABASE_OPTION.md
