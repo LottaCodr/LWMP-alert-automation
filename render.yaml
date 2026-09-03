@@ -20,9 +20,9 @@ services:
           name: living-water-alerts-db
           property: connectionString
       - key: SCHEDULER_ENABLED
-        value: "false"
+        value: 'false'
       - key: PG_POOL_MAX
-        value: "10"
+        value: '10'
 
   - type: worker
     name: living-water-birthday-care-worker
@@ -41,7 +41,7 @@ services:
           name: living-water-alerts-db
           property: connectionString
       - key: PG_POOL_MAX
-        value: "5"
+        value: '5'
 
 databases:
   - name: living-water-alerts-db
@@ -69,7 +69,7 @@ envVarGroups:
       - key: TERMII_BASE_URL
         value: https://v3.api.termii.com
       - key: PROVIDER_REQUEST_TIMEOUT_MS
-        value: "10000"
+        value: '10000'
       - key: META_TEMPLATE_LANGUAGE
         value: en_US
       - key: META_GRAPH_VERSION

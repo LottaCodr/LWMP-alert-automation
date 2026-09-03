@@ -1,37 +1,54 @@
 {
   "name": "living-water-alerts",
   "version": "1.0.0",
-  "main": "build/server/entry.js",
+  "description": "Birthday care automation for Living Water Mega Parish: encrypted member records, scheduled WhatsApp/SMS digests with provider receipts, RBAC and a full audit trail.",
+  "private": true,
+  "type": "module",
+  "main": "build/server/index.js",
+  "license": "ISC",
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "scripts": {
     "clean": "node -e \"require('node:fs').rmSync('build', { recursive: true, force: true })\"",
-    "typecheck:server": "tsc -p tsconfig.server.json --noEmit",
-    "typecheck:client": "tsc -p client/tsconfig.json --noEmit",
-    "typecheck": "npm run typecheck:server && npm run typecheck:client",
+    "dev": "vite --config client/vite.config.ts",
+    "dev:server": "tsx server/index.ts",
+    "dev:worker": "tsx server/worker.ts",
+    "dev:demo": "DATABASE_URL=pgmem:// SEED_DEMO_DATA=true tsx server/index.ts",
+    "build": "npm run clean && npm run typecheck && npm run build:server && npm run build:client",
     "build:server": "tsc -p tsconfig.server.json",
     "build:client": "vite build --config client/vite.config.ts",
-    "build": "npm run clean && npm run typecheck && npm run build:server && npm run build:client",
-    "start": "node build/server/entry.js",
-    "dev": "vite --config client/vite.config.ts",
-    "dev:server": "tsx server/entry.ts",
+    "start": "node build/server/index.js",
     "worker": "node build/server/worker.js",
-    "dev:worker": "tsx server/worker.ts",
+    "typecheck": "npm run typecheck:server && npm run typecheck:client",
+    "typecheck:server": "tsc -p tsconfig.server.json --noEmit",
+    "typecheck:client": "tsc -p client/tsconfig.json --noEmit",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "smoke:postgres": "tsx scripts/smoke-test-postgres.ts",
     "migrate:postgres": "npm run build:server && node build/scripts/migrate-postgres.js",
     "import:sqlite:postgres": "npm run build:server && node build/scripts/import-sqlite-to-postgres.js",
     "bootstrap:owner": "npm run build:server && node build/scripts/bootstrap-owner.js",
-    "smoke:postgres": "tsx scripts/smoke-test-postgres.ts",
-    "test": "npm run typecheck && npm run smoke:postgres"
+    "check": "npm run typecheck && npm run lint && npm run test && npm run smoke:postgres"
   },
-  "keywords": [],
+  "keywords": [
+    "church",
+    "birthday",
+    "whatsapp",
+    "sms",
+    "express",
+    "postgresql"
+  ],
   "author": "",
-  "license": "ISC",
-  "description": "",
-  "private": "true",
-  "type": "module",
   "dependencies": {
     "@simplewebauthn/browser": "^13.3.0",
     "@simplewebauthn/server": "^13.3.3",
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^12.11.1",
     "connect-pg-simple": "^10.0.0",
     "csv-parse": "^7.0.2",
     "express": "^5.2.1",
@@ -43,9 +60,15 @@
     "otplib": "^13.5.0",
     "pg": "^8.23.0",
     "qrcode": "^1.5.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "zod": "^4.5.4"
   },
+  "optionalDependencies": {
+    "better-sqlite3": "^12.11.1"
+  },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/better-sqlite3": "^9.6.0",
     "@types/connect-pg-simple": "^7.0.3",
     "@types/express": "^5.0.6",
@@ -56,14 +79,14 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
     "@vitejs/plugin-react": "^6.1.1",
+    "eslint": "^10.9.1",
+    "globals": "^17.12.0",
     "pg-mem": "^3.0.14",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "prettier": "^3.9.6",
     "tsx": "^4.23.13",
-    "typescript": "7.0.2",
-    "vite": "^8.2.2"
-  },
-  "engines": {
-    "node": ">=20.19.0"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.69.0",
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
   }
 }

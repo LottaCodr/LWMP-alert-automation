@@ -11,16 +11,21 @@ const migrationsDirectory = path.resolve(process.cwd(), 'migrations');
 const connectionString = process.env.MIGRATIONS_DATABASE_URL || process.env.DATABASE_URL;
 
 if (!connectionString) {
-  console.error('DATABASE_URL or MIGRATIONS_DATABASE_URL is required. Keep either value in encrypted deployment configuration.');
+  console.error(
+    'DATABASE_URL or MIGRATIONS_DATABASE_URL is required. Keep either value in encrypted deployment configuration.',
+  );
   process.exit(1);
 }
 
 const client = new pg.Client({
   connectionString,
-  ssl: process.env.PGSSLMODE === 'require' || /render\.(com|internal)|supabase\.co/.test(connectionString) ? { rejectUnauthorized: process.env.PG_SSL_REJECT_UNAUTHORIZED !== 'false' } : undefined,
+  ssl:
+    process.env.PGSSLMODE === 'require' || /render\.(com|internal)|supabase\.co/.test(connectionString)
+      ? { rejectUnauthorized: process.env.PG_SSL_REJECT_UNAUTHORIZED !== 'false' }
+      : undefined,
 });
 
-function checksum(content) {
+function checksum(content: string): string {
   return crypto.createHash('sha256').update(content).digest('hex');
 }
 
@@ -37,9 +42,15 @@ try {
   for (const filename of files) {
     const content = await fs.readFile(path.join(migrationsDirectory, filename), 'utf8');
     const hash = checksum(content);
-    const applied = await client.query('SELECT checksum FROM schema_migrations WHERE filename = $1', [filename]);
-    if (applied.rowCount) {
-      if (applied.rows[0].checksum !== hash) throw new Error(`Migration ${filename} was changed after application. Add a new migration instead.`);
+    const applied = await client.query<{ checksum: string }>(
+      'SELECT checksum FROM schema_migrations WHERE filename = $1',
+      [filename],
+    );
+    const recorded = applied.rows[0];
+    if (recorded) {
+      if (recorded.checksum !== hash) {
+        throw new Error(`Migration ${filename} was changed after application. Add a new migration instead.`);
+      }
       console.log(`skip ${filename}`);
       continue;
     }
@@ -56,7 +67,7 @@ try {
   }
   console.log('PostgreSQL migrations are current.');
 } catch (error) {
-  console.error(`Migration failed: ${error.message}`);
+  console.error(`Migration failed: ${error instanceof Error ? error.message : String(error)}`);
   process.exitCode = 1;
 } finally {
   await client.end().catch(() => {});

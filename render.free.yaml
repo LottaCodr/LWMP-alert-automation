@@ -1,0 +1,97 @@
+# Render Blueprint — FREE tier topology for Living Water Mega Parish Birthday Care.
+#
+# One web service only:
+#   * free instances cannot run background workers or cron jobs, so the birthday
+#     scheduler runs in-process via SCHEDULER_ENABLED=true;
+#   * Render's free PostgreSQL is deleted 30 days after creation, so the
+#     database must be external (Neon free works well) and is entered privately.
+#
+# For the paid, production-grade layout (dedicated worker + managed Postgres)
+# use `render.yaml` instead. Full walkthrough: docs/HOSTING.md.
+services:
+  - type: web
+    name: living-water-birthday-care
+    runtime: node
+    region: frankfurt
+    plan: free
+    numInstances: 1
+    maxShutdownDelaySeconds: 60
+    buildCommand: npm ci && npm run build
+    # If your plan cannot run a pre-deploy command, apply migrations manually:
+    #   DATABASE_URL=… npm run migrate:postgres
+    preDeployCommand: npm run migrate:postgres
+    startCommand: npm start
+    # Liveness probe: answers without touching the database, so a cold Neon
+    # database cannot make Render restart a perfectly healthy instance.
+    healthCheckPath: /api/health/live
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TZ
+        value: Africa/Lagos
+
+      # --- Secrets: enter these privately in the Render UI. -----------------
+      # Neon *pooled* connection string (…-pooler.…/neondb?sslmode=require)
+      - key: DATABASE_URL
+        sync: false
+      # openssl rand -base64 48
+      - key: SESSION_SECRET
+        generateValue: true
+      # openssl rand -base64 32 — encrypts member phone numbers. Back it up:
+      # losing it makes stored numbers permanently unreadable.
+      - key: FIELD_ENCRYPTION_KEY
+        sync: false
+      # openssl rand -base64 32 — duplicate detection. Rotating it breaks
+      # matching against numbers stored before the rotation.
+      - key: PHONE_HASH_KEY
+        sync: false
+      - key: META_WEBHOOK_VERIFY_TOKEN
+        generateValue: true
+
+      # --- Split hosting (Vercel front end + this API). ---------------------
+      # Leave CORS_ORIGINS unset if you serve the SPA from this same service.
+      - key: APP_ORIGIN
+        sync: false
+      - key: WEBAUTHN_ORIGIN
+        sync: false
+      - key: WEBAUTHN_RP_ID
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+
+      # --- Required on a free instance: no separate worker is available. ----
+      - key: SCHEDULER_ENABLED
+        value: 'true'
+      - key: PG_POOL_MAX
+        value: '5'
+
+      # --- Delivery: keep mock until provider onboarding is complete. -------
+      - key: MESSAGE_MODE
+        value: mock
+      - key: EMAIL_MODE
+        value: mock
+      - key: TOTP_ISSUER
+        value: Living Water Mega Parish
+      - key: LOG_LEVEL
+        value: info
+
+      # --- Only needed once you switch MESSAGE_MODE to live. ----------------
+      - key: RESEND_API_KEY
+        sync: false
+      - key: INVITE_FROM_EMAIL
+        sync: false
+      - key: META_WHATSAPP_TOKEN
+        sync: false
+      - key: META_PHONE_NUMBER_ID
+        sync: false
+      - key: META_BIRTHDAY_TEMPLATE
+        sync: false
+      - key: META_APP_SECRET
+        sync: false
+      - key: TERMII_API_KEY
+        sync: false
+      - key: TERMII_SENDER_ID
+        sync: false
+      - key: TERMII_WEBHOOK_SECRET
+        sync: false

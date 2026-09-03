@@ -21,9 +21,9 @@ services:
       - key: PGSSLMODE
         value: require
       - key: PG_POOL_MAX
-        value: "5"
+        value: '5'
       - key: SCHEDULER_ENABLED
-        value: "false"
+        value: 'false'
 
   - type: worker
     name: living-water-birthday-care-worker
@@ -42,7 +42,7 @@ services:
       - key: PGSSLMODE
         value: require
       - key: PG_POOL_MAX
-        value: "5"
+        value: '5'
 
 envVarGroups:
   - name: living-water-supabase-common
@@ -61,7 +61,7 @@ envVarGroups:
       - key: TERMII_BASE_URL
         value: https://v3.api.termii.com
       - key: PROVIDER_REQUEST_TIMEOUT_MS
-        value: "10000"
+        value: '10000'
       - key: META_TEMPLATE_LANGUAGE
         value: en_US
       - key: META_GRAPH_VERSION
