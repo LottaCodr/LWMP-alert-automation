@@ -1,0 +1,112 @@
+# Render Blueprint for Living Water Mega Parish – RCCG Birthday Care.
+# Enter all sync:false values in Render's encrypted environment UI. Never copy secrets into git or chat.
+services:
+  - type: web
+    name: living-water-birthday-care
+    runtime: node
+    region: frankfurt
+    plan: 1c-2g
+    numInstances: 1
+    maxShutdownDelaySeconds: 120
+    buildCommand: npm ci && npm run build
+    preDeployCommand: npm run migrate:postgres
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - fromGroup: living-water-common
+      - key: DATABASE_URL
+        fromDatabase:
+          name: living-water-alerts-db
+          property: connectionString
+      - key: SCHEDULER_ENABLED
+        value: "false"
+      - key: PG_POOL_MAX
+        value: "10"
+
+  - type: worker
+    name: living-water-birthday-care-worker
+    runtime: node
+    region: frankfurt
+    plan: 0.5c-512mb
+    numInstances: 1
+    maxShutdownDelaySeconds: 120
+    buildCommand: npm ci && npm run build:server
+    startCommand: npm run worker
+    autoDeployTrigger: commit
+    envVars:
+      - fromGroup: living-water-common
+      - key: DATABASE_URL
+        fromDatabase:
+          name: living-water-alerts-db
+          property: connectionString
+      - key: PG_POOL_MAX
+        value: "5"
+
+databases:
+  - name: living-water-alerts-db
+    databaseName: livingwater
+    user: livingwater
+    region: frankfurt
+    plan: 1g
+    # Private-network-only access: the web service and worker use Render's internal connection string.
+    ipAllowList: []
+
+envVarGroups:
+  - name: living-water-common
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Keep mock delivery until all onboarding gates below are complete; mock never sends real alerts.
+      - key: MESSAGE_MODE
+        value: mock
+      - key: EMAIL_MODE
+        value: resend
+      - key: TERMII_SMS_CHANNEL
+        value: dnd
+      - key: TERMII_OTP_MODE
+        value: native
+      - key: TERMII_BASE_URL
+        value: https://v3.api.termii.com
+      - key: PROVIDER_REQUEST_TIMEOUT_MS
+        value: "10000"
+      - key: META_TEMPLATE_LANGUAGE
+        value: en_US
+      - key: META_GRAPH_VERSION
+        value: v23.0
+      - key: TOTP_ISSUER
+        value: Living Water Mega Parish
+      # Generated once and shared by both Render services.
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: FIELD_ENCRYPTION_KEY
+        generateValue: true
+      - key: PHONE_HASH_KEY
+        generateValue: true
+      - key: META_WEBHOOK_VERIFY_TOKEN
+        generateValue: true
+      # Parish-controlled values, entered privately in Render when ready.
+      - key: APP_ORIGIN
+        sync: false
+      - key: WEBAUTHN_ORIGIN
+        sync: false
+      - key: WEBAUTHN_RP_ID
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: INVITE_FROM_EMAIL
+        sync: false
+      - key: META_WHATSAPP_TOKEN
+        sync: false
+      - key: META_PHONE_NUMBER_ID
+        sync: false
+      - key: META_BIRTHDAY_TEMPLATE
+        sync: false
+      - key: META_APP_SECRET
+        sync: false
+      - key: TERMII_API_KEY
+        sync: false
+      - key: TERMII_SENDER_ID
+        sync: false
+      - key: TERMII_WEBHOOK_SECRET
+        sync: false

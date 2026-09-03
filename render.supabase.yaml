@@ -1,0 +1,102 @@
+# Optional Render Blueprint when Supabase hosts PostgreSQL.
+# Use this INSTEAD OF render.yaml only after creating a Supabase Pro project in Frankfurt.
+# In Render Blueprint setup, choose this file and enter DATABASE_URL as the Supavisor SESSION-mode URI (port 5432).
+services:
+  - type: web
+    name: living-water-birthday-care
+    runtime: node
+    region: frankfurt
+    plan: 1c-2g
+    numInstances: 1
+    maxShutdownDelaySeconds: 120
+    buildCommand: npm ci && npm run build
+    preDeployCommand: npm run migrate:postgres
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - fromGroup: living-water-supabase-common
+      - key: DATABASE_URL
+        sync: false
+      - key: PGSSLMODE
+        value: require
+      - key: PG_POOL_MAX
+        value: "5"
+      - key: SCHEDULER_ENABLED
+        value: "false"
+
+  - type: worker
+    name: living-water-birthday-care-worker
+    runtime: node
+    region: frankfurt
+    plan: 0.5c-512mb
+    numInstances: 1
+    maxShutdownDelaySeconds: 120
+    buildCommand: npm ci && npm run build:server
+    startCommand: npm run worker
+    autoDeployTrigger: commit
+    envVars:
+      - fromGroup: living-water-supabase-common
+      - key: DATABASE_URL
+        sync: false
+      - key: PGSSLMODE
+        value: require
+      - key: PG_POOL_MAX
+        value: "5"
+
+envVarGroups:
+  - name: living-water-supabase-common
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # No real messages leave the system until the parish completes both provider checklists.
+      - key: MESSAGE_MODE
+        value: mock
+      - key: EMAIL_MODE
+        value: resend
+      - key: TERMII_SMS_CHANNEL
+        value: dnd
+      - key: TERMII_OTP_MODE
+        value: native
+      - key: TERMII_BASE_URL
+        value: https://v3.api.termii.com
+      - key: PROVIDER_REQUEST_TIMEOUT_MS
+        value: "10000"
+      - key: META_TEMPLATE_LANGUAGE
+        value: en_US
+      - key: META_GRAPH_VERSION
+        value: v23.0
+      - key: TOTP_ISSUER
+        value: Living Water Mega Parish
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: FIELD_ENCRYPTION_KEY
+        generateValue: true
+      - key: PHONE_HASH_KEY
+        generateValue: true
+      - key: META_WEBHOOK_VERIFY_TOKEN
+        generateValue: true
+      - key: APP_ORIGIN
+        sync: false
+      - key: WEBAUTHN_ORIGIN
+        sync: false
+      - key: WEBAUTHN_RP_ID
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: INVITE_FROM_EMAIL
+        sync: false
+      - key: META_WHATSAPP_TOKEN
+        sync: false
+      - key: META_PHONE_NUMBER_ID
+        sync: false
+      - key: META_BIRTHDAY_TEMPLATE
+        sync: false
+      - key: META_APP_SECRET
+        sync: false
+      - key: TERMII_API_KEY
+        sync: false
+      - key: TERMII_SENDER_ID
+        sync: false
+      - key: TERMII_WEBHOOK_SECRET
+        sync: false
